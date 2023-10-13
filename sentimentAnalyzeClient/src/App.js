@@ -1,4 +1,3 @@
-import './bootstrap.min.css';
 import './App.css';
 import EmotionTable from './EmotionTable.js';
 import React from 'react';
@@ -11,8 +10,12 @@ class App extends React.Component {
     is set to text
     */
     state = {
-        innercomp: <textarea rows="4" cols="50" id="textinput" />,
         mode: "text",
+        innercomp: 
+            <div class="pt-5">
+                Enter your text here for analyzing.<br/>
+                <textarea rows={6} cols="50" id="textinput" />
+            </div>,
         sentimentOutput: [],
         sentiment: true
     }
@@ -28,10 +31,15 @@ class App extends React.Component {
         //If the input mode is text make it 4 lines
         if (input_mode === "text") {
             mode = "text"
-            rows = 4
+            rows = 6
         }
         this.setState({
-            innercomp: <textarea rows={rows} cols="50" id="textinput" />,
+            innercomp: 
+                <div class="pt-5">
+                    Enter your {mode === "text" ? "text" : "URL"} here for analyzing.<br/>
+                    <textarea rows={rows} cols="50" id="textinput" />
+                </div>
+            ,
             mode: mode,
             sentimentOutput: [],
             sentiment: true
@@ -45,6 +53,16 @@ class App extends React.Component {
         url = url + "/" + mode + "/sentiment?" + mode + "=" + document.getElementById("textinput").value;
 
         fetch(url).then((response) => {
+            console.log(response.status)
+            if (response.status === 422) {
+                this.setState({ sentimentOutput: 
+                    <div class="alert alert-warning alert-dismissible fade show">
+                        <button type="button" class="btn-close" dataBsDismiss="alert" ariaLabel="Close"></button>
+                        <strong>Your input is either blank or invalid!</strong>
+                    </div> 
+                });
+                return;
+            }
             response.json().then((data) => {
                 this.setState({ sentimentOutput: data.label });
                 let output = data.label;
@@ -54,7 +72,7 @@ class App extends React.Component {
                     case "negative": color = "red"; break;
                     default: color = "yellow";
                 }
-                output = <div style={{ color: color, fontSize: 20 }}>{output}</div>
+                output = <div class="pt-5" style={{ color: color, fontSize: 20 }}>{output}</div>
                 this.setState({ sentimentOutput: output });
             })
         });
@@ -68,9 +86,19 @@ class App extends React.Component {
         url = url + "/" + mode + "/emotion?" + mode + "=" + document.getElementById("textinput").value;
 
         fetch(url).then((response) => {
+            console.log(response.status)
+            if (response.status === 422) {
+                this.setState({ sentimentOutput: 
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <strong>Your input is either blank or invalid!</strong>
+                        <button type="button" class="btn-close" dataBsDismiss="alert" ariaLabel="Close"></button>
+                    </div> 
+                });
+                return;
+            }
             response.json().then((data) => {
                 this.setState({ sentimentOutput: <EmotionTable emotions={data} /> });
-            })
+            });
         });
     }
 
@@ -78,14 +106,18 @@ class App extends React.Component {
     render() {
         return (
             <div className="App">
-                <button className="btn btn-info" onClick={() => { this.renderOutput('text') }}>Text</button>
-                <button className="btn btn-dark" onClick={() => { this.renderOutput('url') }}>URL</button>
-                <br /><br />
+                <div class="d-flex justify-content-center pt-5">
+                    <button className="btn btn-outline-primary" onClick={() => { this.renderOutput('text') }}>Text</button>
+                    <button className="btn btn-outline-primary" onClick={() => { this.renderOutput('url') }}>URL</button>
+                </div>
+               
                 {this.state.innercomp}
-                <br />
-                <button className="btn-primary" onClick={this.sendForSentimentAnalysis}>Analyze Sentiment</button>
-                <button className="btn-primary" onClick={this.sendForEmotionAnalysis}>Analyze Emotion</button>
-                <br />
+
+                <div class="d-flex justify-content-center pt-5">
+                    <button className="btn btn-outline-dark" onClick={this.sendForSentimentAnalysis}>Analyze Sentiment</button>
+                    <button className="btn btn-outline-dark" onClick={this.sendForEmotionAnalysis}>Analyze Emotion</button>
+                </div>
+              
                 {this.state.sentimentOutput}
             </div>
         );

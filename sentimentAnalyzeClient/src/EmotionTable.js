@@ -1,19 +1,24 @@
 import React from 'react';
-import './bootstrap.min.css';
 
 class EmotionTable extends React.Component {
     render() {
         //Returns the emotions as an HTML table
         return (
-            <div>
-                <table className="table table-bordered">
+            <div class="pt-5">
+                <table className="table table-hover table-responsive">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Emotion</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         {Object.entries(this.props.emotions).map(
                             (mapentry) => {
                                 return (
                                     <tr>
-                                    <td>{mapentry[0]}</td>
-                                    <td>{mapentry[1]}</td>
+                                        <td>{mapentry[0]}</td>
+                                        <td>{(mapentry[1]*100).toFixed(2) + '%'}</td>
                                     </tr>
                                 );
                             }
