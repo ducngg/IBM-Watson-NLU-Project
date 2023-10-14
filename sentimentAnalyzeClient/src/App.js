@@ -2,6 +2,14 @@ import './App.css';
 import EmotionTable from './EmotionTable.js';
 import React from 'react';
 
+const Spinner = () => {
+    return (
+        <div class="pt-5">
+            <span class="spinner-border"></span>
+        </div>
+    )
+}
+
 class App extends React.Component {
     /*
     We are setting the component as a state named innercomp.
@@ -17,7 +25,8 @@ class App extends React.Component {
                 <textarea rows={6} cols="50" id="textinput" />
             </div>,
         sentimentOutput: [],
-        sentiment: true
+        sentiment: true,
+        loading: false
     }
     /*
     This method returns the component based on what the input mode is.
@@ -42,18 +51,19 @@ class App extends React.Component {
             ,
             mode: mode,
             sentimentOutput: [],
-            sentiment: true
+            sentiment: true,
+            loading: false
         });
     }
 
     sendForSentimentAnalysis = () => {
-        this.setState({ sentiment: true });
+        this.setState({ sentiment: true, loading: true });
         let url = "."; 
         let mode = this.state.mode
         url = url + "/" + mode + "/sentiment?" + mode + "=" + document.getElementById("textinput").value;
 
         fetch(url).then((response) => {
-            console.log(response.status)
+            this.setState({ loading: false })
             if (response.status === 422) {
                 this.setState({ sentimentOutput: 
                     <div class="alert alert-warning alert-dismissible fade show">
@@ -80,13 +90,13 @@ class App extends React.Component {
 
     sendForEmotionAnalysis = () => {
 
-        this.setState({ sentiment: false });
+        this.setState({ sentiment: false, loading: true });
         let url = ".";
         let mode = this.state.mode
         url = url + "/" + mode + "/emotion?" + mode + "=" + document.getElementById("textinput").value;
 
         fetch(url).then((response) => {
-            console.log(response.status)
+            this.setState({ loading: false })
             if (response.status === 422) {
                 this.setState({ sentimentOutput: 
                     <div class="alert alert-warning alert-dismissible fade show" role="alert">
@@ -114,11 +124,15 @@ class App extends React.Component {
                 {this.state.innercomp}
 
                 <div class="d-flex justify-content-center pt-5">
-                    <button className="btn btn-outline-dark" onClick={this.sendForSentimentAnalysis}>Analyze Sentiment</button>
-                    <button className="btn btn-outline-dark" onClick={this.sendForEmotionAnalysis}>Analyze Emotion</button>
+                    <button className="btn btn-outline-dark" onClick={this.sendForSentimentAnalysis}>
+                        Analyze Sentiment
+                    </button>
+                    <button className="btn btn-outline-dark" onClick={this.sendForEmotionAnalysis}>
+                        Analyze Emotion
+                    </button>
                 </div>
               
-                {this.state.sentimentOutput}
+                {this.state.loading ? <Spinner /> : this.state.sentimentOutput}
             </div>
         );
     }
